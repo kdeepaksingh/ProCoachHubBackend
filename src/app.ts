@@ -5,6 +5,9 @@ import cookieParser from "cookie-parser";
 import path from "path";
 
 import authRoutes from "./routes/auth.routes";
+import studentRoutes from "./routes/studentRoutes";
+import adminRoutes from "./routes/adminRoutes";
+import teacherRoutes from "./routes/teacherRoutes";
 import { errorHandler } from "./middleware/error.middleware";
 
 const app = express();
@@ -73,6 +76,9 @@ app.get("/health", (_req, res) => {
 ========================= */
 
 app.use("/api/auth", authRoutes);
+app.use("/api/student", studentRoutes);
+app.use("/api/teacher", teacherRoutes);
+app.use("/api/admin", adminRoutes);
 
 /* =========================
    ERROR HANDLER
