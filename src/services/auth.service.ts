@@ -93,6 +93,62 @@ export const verifyUserOtp = async (emailOrPhone: string, otp: string) => {
   return user;
 };
 
+export const verifyForgotOtp = async (emailOrPhone: string, otp: string) => {
+  const user = await User.findOne({
+    $or: [{ email: emailOrPhone.toLowerCase() }, { phone: emailOrPhone }],
+  });
+
+  if (!user) {
+    // Don't reveal if user exists; just treat as invalid OTP
+    throw new ApiError(400, "Invalid OTP");
+  }
+
+  // Find OTP for reset_password, not used yet
+  const otpRecord = await Otp.findOne({
+    userId: user._id,
+    purpose: OTP_PURPOSE.RESET_PASSWORD,
+    usedAt: null,
+  }).select("+codeHash");
+
+  if (!otpRecord) {
+    throw new ApiError(400, "Invalid OTP");
+  }
+
+  if (otpRecord.expiresAt.getTime() < Date.now()) {
+    // Optionally delete expired OTP
+    await Otp.deleteOne({ _id: otpRecord._id });
+    throw new ApiError(400, "OTP has expired. Please request a new one.");
+  }
+
+  if (otpRecord.attempts >= 5) {
+    await Otp.deleteOne({ _id: otpRecord._id });
+    throw new ApiError(
+      400,
+      "Too many failed attempts. Please request a new OTP.",
+    );
+  }
+
+  const codeHash = sha256(otp);
+  if (codeHash !== otpRecord.codeHash) {
+    otpRecord.attempts += 1;
+    await otpRecord.save();
+    throw new ApiError(400, "Invalid OTP");
+  }
+
+  // Mark OTP as used
+  otpRecord.usedAt = new Date();
+  await otpRecord.save();
+
+  // Optionally, you could also mark PasswordReset as verified here,
+  // but for now we just verify OTP and let resetPassword re-check PasswordReset.
+
+  return {
+    userId: user._id.toString(),
+    email: user.email,
+    phone: user.phone,
+  };
+};
+
 export const resendUserOtp = async (emailOrPhone: string) => {
   const user = await User.findOne({
     $or: [{ email: emailOrPhone.toLowerCase() }, { phone: emailOrPhone }],

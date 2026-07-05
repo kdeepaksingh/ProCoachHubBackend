@@ -38,6 +38,11 @@ export const verifyOtpSchema = z.object({
   otp: z.string().min(4).max(8),
 });
 
+export const verifyForgotOtpSchema = z.object({
+  emailOrPhone: z.string().min(1, "Email or phone is required"),
+  otp: z.string().min(1, "OTP is required").length(6, "OTP must be 6 digits"),
+});
+
 export const resendOtpSchema = z.object({
   emailOrPhone: z.string().min(3),
 });

@@ -10,6 +10,7 @@ import {
   resendOtpSchema,
   resetPasswordSchema,
   updateProfileSchema,
+  verifyForgotOtpSchema,
   verifyOtpSchema,
 } from "../validations/auth.validation";
 import {
@@ -23,6 +24,7 @@ import {
   resendOtp,
   resetPasswordHandler,
   updateProfileHandler,
+  verifyForgotOtpHandler,
   verifyOtp,
 } from "../controllers/auth.controller";
 import { requireAuth } from "../middleware/auth.middleware";
@@ -36,7 +38,6 @@ router.post(
   register,
 );
 router.post("/verify-otp", validate(verifyOtpSchema), verifyOtp);
-// router.post("/verify-otp", validate(verifyOtpSchema), verifyOtp);
 router.post("/resend-otp", validate(resendOtpSchema), resendOtp);
 router.post("/login", validate(loginSchema), login);
 router.post("/refresh", validate(refreshSchema), refresh);
@@ -45,6 +46,11 @@ router.post(
   "/forgot-password",
   validate(forgotPasswordSchema),
   forgotPasswordHandler,
+);
+router.post(
+  "/verify-forgot-password-otp",
+  validate(verifyForgotOtpSchema),
+  verifyForgotOtpHandler,
 );
 router.post(
   "/reset-password",

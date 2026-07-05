@@ -11,6 +11,7 @@ import {
   resendUserOtp,
   resetPassword,
   updateProfile,
+  verifyForgotOtp,
   verifyUserOtp,
 } from "../services/auth.service";
 import { apiResponse } from "../utils/apiResponse";
@@ -29,7 +30,7 @@ export const register = async (
 ) => {
   try {
     const profileImagePath = req.file
-      ? `/uploads/profiles/${req.file.filename}`
+      ? `uploads/profiles/${req.file.filename}`
       : "";
     const user = await registerUser(req.body, profileImagePath);
     res.status(201).json(
@@ -51,6 +52,22 @@ export const verifyOtp = async (
 ) => {
   try {
     await verifyUserOtp(req.body.emailOrPhone, req.body.otp);
+    res.json(apiResponse(true, "OTP verified successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyForgotOtpHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { emailOrPhone, otp } = req.body;
+
+    await verifyForgotOtp(emailOrPhone, otp);
+
     res.json(apiResponse(true, "OTP verified successfully"));
   } catch (error) {
     next(error);
@@ -185,7 +202,7 @@ export const updateProfileHandler = async (
   try {
     const userId = (req as any).user.userId;
     const profileImagePath = req.file
-      ? `/uploads/profiles/${req.file.filename}`
+      ? `uploads/profiles/${req.file.filename}`
       : undefined;
     const user = await updateProfile(userId, req.body, profileImagePath);
     res.json(apiResponse(true, "Profile updated successfully", user));
