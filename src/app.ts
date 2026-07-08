@@ -79,7 +79,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/student", studentRoutes);
 app.use("/api/teacher", teacherRoutes);
 app.use("/api/admin", adminRoutes);
-
+  
 /* =========================
    ERROR HANDLER
 ========================= */
